@@ -15,11 +15,10 @@ namespace wfdxd
         private static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
-            var process = Process.GetProcessesByName("Warframe.x64").FirstOrDefault();
-            if (process == null)
+            Process process = null;
+            while (process == null)
             {
-                Console.WriteLine("Cant find Warframe process!");
-                return;
+                process = Process.GetProcessesByName("Warframe.x64").FirstOrDefault();
             }
 
             string channelName = null;

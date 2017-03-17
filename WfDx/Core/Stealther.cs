@@ -31,7 +31,6 @@ Library: System.Reflection.ni.dll
 
 namespace WfDx.Core
 {
-    //TODO: Link unlinked
     internal class Stealther
     {
         private readonly ServerInterface client = EntryPoint.Server;
@@ -46,10 +45,12 @@ namespace WfDx.Core
             IntPtr processHandle, int processInformationClass, ref ProcessBasicInformation processInformation,
             uint processInformationLength, ref int returnLength);
 
+        private delegate bool EnumPageFilesDelegate(IntPtr pCallback, IntPtr context);
 
         private readonly Hook<OpenProcessDelegate> openProcessHook;
         private readonly Hook<CreateToolhelp32SnapshotDelegate> snapshotHook;
         private readonly Hook<EnumProcessModulesDelegate> enumProcessModulesHook;
+        private readonly Hook<EnumPageFilesDelegate> enumPageFilesHook;
 
         private readonly HashSet<string> dllsToUnlink = new HashSet<string>
         {
@@ -73,6 +74,10 @@ namespace WfDx.Core
             address = LocalHook.GetProcAddress("psapi.dll", "EnumProcessModules");
             enumProcessModulesHook = new Hook<EnumProcessModulesDelegate>(address, new EnumProcessModulesDelegate(MyEnumProcessModules), this);
             enumProcessModulesHook.Activate();
+
+            address = LocalHook.GetProcAddress("psapi.dll", "EnumPageFilesW");
+            enumPageFilesHook = new Hook<EnumPageFilesDelegate>(address, new EnumPageFilesDelegate(MyEnumPageFiles), this);
+            enumPageFilesHook.Activate();
 
             UnlinkNessesaryModules();
         }
@@ -114,8 +119,6 @@ namespace WfDx.Core
                         UnlinkModule(tmp.InMemoryOrderList);
                         UnlinkModule(tmp.InInitialisationOrderList);
                     }
-                    else
-                        client.DebugMessage($"Library: {libName}");
                     tmp = Marshal.PtrToStructure<LdrModule>(tmp.InLoadOrderList.next);
                 }
 
@@ -160,10 +163,18 @@ namespace WfDx.Core
             [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U4)] [In] [Out] uint[] lphModule, uint cb,
             [MarshalAs(UnmanagedType.U4)] out uint lpcbNeeded)
         {
-            client.SendMessage("Scanned memory modules!");
-            return enumProcessModulesHook.Origin(hProcess, lphModule, cb, out lpcbNeeded);
+            client.DebugMessage("Scanned memory modules!");
+            //return enumProcessModulesHook.Origin(hProcess, lphModule, cb, out lpcbNeeded);
+            lpcbNeeded = 0;
+            return false;
         }
 
+
+        private bool MyEnumPageFiles(IntPtr pCallback, IntPtr context)
+        {
+            client.SendMessage("Tried to scan memory pages");
+            return false;
+        }
 
         private IntPtr MyOpenProcess(uint processAccess, bool bInheritHandle, int processId)
         {
@@ -184,6 +195,7 @@ namespace WfDx.Core
             openProcessHook?.Dispose();
             snapshotHook?.Dispose();
             enumProcessModulesHook?.Dispose();
+            enumPageFilesHook?.Dispose();
         }
 
         #region Structs
