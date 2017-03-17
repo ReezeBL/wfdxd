@@ -15,7 +15,7 @@ namespace wfdxd
         private static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
-            var process = Process.GetProcessesByName("Launcher").FirstOrDefault();
+            var process = Process.GetProcessesByName("Warframe.x64").FirstOrDefault();
             if (process == null)
             {
                 Console.WriteLine("Cant find Warframe process!");

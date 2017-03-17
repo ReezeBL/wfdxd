@@ -64,7 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\HideMeister.cs" />
+    <Compile Include="Core\Stealther.cs" />
     <Compile Include="Core\Hook.cs" />
     <Compile Include="Core\SwapChainVTbl.cs" />
     <Compile Include="Core\Hooks\DirectX11Hook.cs" />

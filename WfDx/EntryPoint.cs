@@ -20,7 +20,7 @@ namespace WfDx
 
         public void Run(RemoteHooking.IContext context, string channelName)
         {
-            HideMeister hideMeister = null;
+            Stealther stealther = null;
             try
             {
                 Server.IsInstalled(RemoteHooking.GetCurrentProcessId());
@@ -29,7 +29,7 @@ namespace WfDx
                 {
                     device.InstallHook();
                 }
-                hideMeister = new HideMeister();
+                stealther = new Stealther();
             }
             catch (Exception e)
             {
@@ -41,9 +41,8 @@ namespace WfDx
                 Thread.Sleep(500);
             }
             
-
+            stealther?.Dispose();
             device?.UninstallHook();
-            hideMeister?.Dispose();
             LocalHook.Release();
 
             Server.DebugMessage("Hooks uninstalled, you can close app!");

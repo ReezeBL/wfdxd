@@ -82,6 +82,7 @@ namespace WfDx.Core.Hooks
 
         private int MyPresent(IntPtr swapChainPtr, int syncInterval, PresentFlags flags)
         {
+
             return presentHook.Origin(swapChainPtr, syncInterval, flags);
         }
 
